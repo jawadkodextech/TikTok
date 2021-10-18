@@ -30,7 +30,7 @@ class HomeFragment : BaseFragment(R.layout.fragment_home) {
         val storiesData = homeViewModel.getDataList()
 
         storiesData.observe(viewLifecycleOwner, Observer { value ->
-            when(value) {
+            when (value) {
                 is ResultData.Loading -> {
                 }
                 is ResultData.Success -> {
@@ -51,7 +51,8 @@ class HomeFragment : BaseFragment(R.layout.fragment_home) {
         dataList.mapIndexed { index, storiesDataModel ->
             urlList[index] = storiesDataModel.storyUrl
         }
-        val inputData = Data.Builder().putStringArray(Constants.KEY_STORIES_LIST_DATA, urlList).build()
+        val inputData =
+            Data.Builder().putStringArray(Constants.KEY_STORIES_LIST_DATA, urlList).build()
         val preCachingWork = OneTimeWorkRequestBuilder<PreCachingService>().setInputData(inputData)
             .build()
         WorkManager.getInstance(requireContext())

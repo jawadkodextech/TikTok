@@ -5,7 +5,10 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.app.tiktok.model.StoriesDataModel
 import com.app.tiktok.ui.story.StoryViewFragment
 
-class StoriesPagerAdapter(fragment: Fragment, val dataList: MutableList<StoriesDataModel> = mutableListOf()) : FragmentStateAdapter(fragment) {
+class StoriesPagerAdapter (
+    fragment: Fragment,
+    val dataList: MutableList<StoriesDataModel> = mutableListOf()
+) : FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int {
         return dataList.size
     }

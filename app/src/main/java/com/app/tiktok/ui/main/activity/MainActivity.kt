@@ -1,7 +1,6 @@
 package com.app.tiktok.ui.main.activity
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -9,13 +8,12 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.tiktok.R
 import com.app.tiktok.base.BaseActivity
-import com.app.tiktok.ui.main.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 
 @AndroidEntryPoint
-class MainActivity: BaseActivity(), NavController.OnDestinationChangedListener {
-    private val homeViewModel by viewModels<MainViewModel>()
+class MainActivity : BaseActivity(), NavController.OnDestinationChangedListener {
+//    private val homeViewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

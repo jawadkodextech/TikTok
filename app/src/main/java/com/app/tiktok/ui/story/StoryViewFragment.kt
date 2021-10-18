@@ -1,5 +1,6 @@
 package com.app.tiktok.ui.story
 
+//import com.google.android.exoplayer2.ExoPlayerFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -11,13 +12,14 @@ import com.app.tiktok.app.MyApp
 import com.app.tiktok.model.StoriesDataModel
 import com.app.tiktok.ui.main.viewmodel.MainViewModel
 import com.app.tiktok.utils.*
-import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.layout_story_view.*
 
@@ -26,7 +28,7 @@ class StoryViewFragment : Fragment(R.layout.fragment_story_view) {
     private var storiesDataModel: StoriesDataModel? = null
 
     private var simplePlayer: SimpleExoPlayer? = null
-    private var cacheDataSourceFactory: CacheDataSourceFactory? = null
+    private var cacheDataSourceFactory: CacheDataSource.Factory? = null
     private val simpleCache = MyApp.simpleCache
     private var toPlayVideoPosition: Int = -1
 
@@ -53,8 +55,10 @@ class StoryViewFragment : Fragment(R.layout.fragment_story_view) {
         text_view_video_description.setTextOrHide(value = storiesDataModel?.storyDescription)
         text_view_music_title.setTextOrHide(value = storiesDataModel?.musicCoverTitle)
 
-        image_view_option_comment_title?.text = storiesDataModel?.commentsCount?.formatNumberAsReadableFormat()
-        image_view_option_like_title?.text = storiesDataModel?.likesCount?.formatNumberAsReadableFormat()
+        image_view_option_comment_title?.text =
+            storiesDataModel?.commentsCount?.formatNumberAsReadableFormat()
+        image_view_option_like_title?.text =
+            storiesDataModel?.likesCount?.formatNumberAsReadableFormat()
 
         image_view_profile_pic?.loadCenterCropImageFromUrl(storiesDataModel?.userProfilePicUrl)
 
@@ -82,23 +86,40 @@ class StoryViewFragment : Fragment(R.layout.fragment_story_view) {
         super.onDestroy()
     }
 
-    private val playerCallback: Player.EventListener? = object: Player.EventListener {
+    private val playerCallback: Player.Listener = object : Player.Listener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             logError("onPlayerStateChanged playbackState: $playbackState")
         }
 
-        override fun onPlayerError(error: com.google.android.exoplayer2.ExoPlaybackException?) {
+        override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
         }
+//        override fun onPlayerError(error: com.google.android.exoplayer2.ExoPlaybackException) {
+//            super.onPlayerError(error)
+//        }
     }
 
     private fun prepareVideoPlayer() {
-        simplePlayer = ExoPlayerFactory.newSimpleInstance(context)
-        cacheDataSourceFactory = CacheDataSourceFactory(simpleCache,
-            DefaultHttpDataSourceFactory(
-                Util.getUserAgent(context,
-                "exo"))
+        simplePlayer =
+            SimpleExoPlayer.Builder(requireContext())
+                .build()//ExoPlayerFactory.newSimpleInstance(context)
+        val dtSorucFact = DefaultHttpDataSource.Factory()
+        dtSorucFact.setUserAgent(
+            Util.getUserAgent(
+                requireContext(),
+                "exo"
+            )
         )
+//            DefaultHttpDataSourceFactory(
+//
+//        )
+        cacheDataSourceFactory = CacheDataSource.Factory()
+        cacheDataSourceFactory?.setCache(simpleCache!!)//setCache(simpleCache)
+        cacheDataSourceFactory?.setUpstreamDataSourceFactory(dtSorucFact)
+//            CacheDataSourceFactory(
+//            simpleCache,
+//
+//        )
     }
 
     private fun getPlayer(): SimpleExoPlayer? {
@@ -112,10 +133,12 @@ class StoryViewFragment : Fragment(R.layout.fragment_story_view) {
         logError("prepareMedia linkUrl: $linkUrl")
 
         val uri = Uri.parse(linkUrl)
-
-        val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory).createMediaSource(uri)
-
-        simplePlayer?.prepare(mediaSource, true, true)
+        val mediaSource =
+            ProgressiveMediaSource.Factory(cacheDataSourceFactory!!)
+                .createMediaSource(MediaItem.fromUri(uri))
+        //.createMediaSource(uri)
+        simplePlayer?.addMediaSource(mediaSource)
+        simplePlayer?.prepare()//prepare(mediaSource, true, true)
         simplePlayer?.repeatMode = Player.REPEAT_MODE_ONE
         simplePlayer?.playWhenReady = true
         simplePlayer?.addListener(playerCallback)
@@ -146,7 +169,7 @@ class StoryViewFragment : Fragment(R.layout.fragment_story_view) {
     }
 
     private fun releasePlayer() {
-        simplePlayer?.stop(true)
+        simplePlayer?.stop()//stop(true)
         simplePlayer?.release()
     }
 }

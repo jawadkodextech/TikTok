@@ -8,12 +8,19 @@ import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvicto
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp
-class MyApp: Application() {
+@HiltAndroidApp//(Application::class)
+class MyApp : Application(){//, Configuration.Provider
     companion object {
         var simpleCache: SimpleCache? = null
         var context: Context? = null
     }
+//    @Inject
+//    lateinit var workerFactory: HiltWorkerFactory
+//
+//    override fun getWorkManagerConfiguration() =
+//        Configuration.Builder()
+//            .setWorkerFactory(workerFactory)
+//            .build()
 
     override fun onCreate() {
         super.onCreate()
